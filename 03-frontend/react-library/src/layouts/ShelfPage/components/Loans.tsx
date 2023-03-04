@@ -59,7 +59,7 @@ export const Loans = () => {
         );
     }
 
-    async function returnBook(bookId: number){
+    async function returnBook(bookId: number) {
         const url = `http://localhost:8080/api/books/secure/return/?bookId=${bookId}`;
         const requestOptions = {
             method: 'PUT',
@@ -69,7 +69,23 @@ export const Loans = () => {
             }
         };
         const returnResponse = await fetch(url, requestOptions);
-        if(!returnResponse.ok){
+        if (!returnResponse.ok) {
+            throw new Error('Something went wrong!');
+        }
+        setCheckout(!checkout);
+    }
+
+    async function renewLoan(bookId: number) {
+        const url = `http://localhost:8080/api/books/secure/renew/loan/?bookId=${bookId}`;
+        const requestOptions = {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        };
+        const returnResponse = await fetch(url, requestOptions);
+        if (!returnResponse.ok) {
             throw new Error('Something went wrong!');
         }
         setCheckout(!checkout);
@@ -135,10 +151,12 @@ export const Loans = () => {
                                     </div>
                                 </div>
                                 <hr />
-                                <LoansModal shelfCurrentLoan={shelfCurrentLoan} mobile={false} returnBook={returnBook}/>
+                                <LoansModal shelfCurrentLoan={shelfCurrentLoan} mobile={false} returnBook={returnBook}
+                                    renewLoan={renewLoan} />
                             </div>
                         ))}
-                    </> : // now = 0 or is less than 0 (bug from backend)
+                    </> 
+                    : // now = 0 or is less than 0 (bug from backend)
                     <>
                         <h3 className='mt-3'>
                             Currently no loans
@@ -160,55 +178,56 @@ export const Loans = () => {
 
                         {shelfCurrentLoans.map(shelfCurrentLoan => (
                             <div key={shelfCurrentLoan.book.id}>
-                                    <div className='d-flex justify-content-center align-items-center'>
-                                        {shelfCurrentLoan.book?.img ?
-                                            <img src={shelfCurrentLoan.book?.img} width='226' height='349' alt='Book' />
-                                            :
-                                            <img src={require('./../../../Images/BooksImages/book-luv2code-1000.png')}
-                                                width='226' height='349' alt='Book' />
-                                        }
-                                    </div>
-                                    <div className='card d-flex mt-5 mb-3'>
-                                        <div className='card-body contaier'>
-                                            <div className='mt-3'>
-                                                <h4>Loan Options</h4>
-                                                {shelfCurrentLoan.daysLeft > 0 &&
-                                                    <p className='text-secondary'>
-                                                        Due in  {shelfCurrentLoan.daysLeft} days.
-                                                    </p>
-                                                }
-                                                {shelfCurrentLoan.daysLeft === 0 &&
-                                                    <p className='text-success'>
-                                                        Due Today.
-                                                    </p>
-                                                }
-                                                {shelfCurrentLoan.daysLeft < 0 &&
-                                                    <p className='text-danger'>
-                                                        Past due by {shelfCurrentLoan.daysLeft} days.
-                                                    </p>
-                                                }
-                                                <div className='list-group mt-3'>
-                                                    <button className='list-group-item list-group-item-action'
-                                                        aria-current='true' data-bs-toggle='modal'
-                                                        data-bs-target={`#mobilemodal${shelfCurrentLoan.book.id}`}>
-                                                        Manage Loan
-                                                    </button>
-                                                    <Link to={'search'} className='list-group-item list-group-item-action'>
-                                                        Search more books?
-                                                    </Link>
-                                                </div>
+                                <div className='d-flex justify-content-center align-items-center'>
+                                    {shelfCurrentLoan.book?.img ?
+                                        <img src={shelfCurrentLoan.book?.img} width='226' height='349' alt='Book' />
+                                        :
+                                        <img src={require('./../../../Images/BooksImages/book-luv2code-1000.png')}
+                                            width='226' height='349' alt='Book' />
+                                    }
+                                </div>
+                                <div className='card d-flex mt-5 mb-3'>
+                                    <div className='card-body contaier'>
+                                        <div className='mt-3'>
+                                            <h4>Loan Options</h4>
+                                            {shelfCurrentLoan.daysLeft > 0 &&
+                                                <p className='text-secondary'>
+                                                    Due in  {shelfCurrentLoan.daysLeft} days.
+                                                </p>
+                                            }
+                                            {shelfCurrentLoan.daysLeft === 0 &&
+                                                <p className='text-success'>
+                                                    Due Today.
+                                                </p>
+                                            }
+                                            {shelfCurrentLoan.daysLeft < 0 &&
+                                                <p className='text-danger'>
+                                                    Past due by {shelfCurrentLoan.daysLeft} days.
+                                                </p>
+                                            }
+                                            <div className='list-group mt-3'>
+                                                <button className='list-group-item list-group-item-action'
+                                                    aria-current='true' data-bs-toggle='modal'
+                                                    data-bs-target={`#mobilemodal${shelfCurrentLoan.book.id}`}>
+                                                    Manage Loan
+                                                </button>
+                                                <Link to={'search'} className='list-group-item list-group-item-action'>
+                                                    Search more books?
+                                                </Link>
                                             </div>
-                                            <hr />
-                                            <p className='mt-3'>
-                                                Help other find their adventure by reviewing your loan.
-                                            </p>
-                                            <Link className='btn btn-primary' to={`/checkout/${shelfCurrentLoan.book.id}`}>
-                                                Leave a review
-                                            </Link>
                                         </div>
+                                        <hr />
+                                        <p className='mt-3'>
+                                            Help other find their adventure by reviewing your loan.
+                                        </p>
+                                        <Link className='btn btn-primary' to={`/checkout/${shelfCurrentLoan.book.id}`}>
+                                            Leave a review
+                                        </Link>
                                     </div>
+                                </div>
                                 <hr />
-                                <LoansModal shelfCurrentLoan={shelfCurrentLoan} mobile={true} returnBook={returnBook}/>
+                                <LoansModal shelfCurrentLoan={shelfCurrentLoan} mobile={true} returnBook={returnBook}
+                                    renewLoan={renewLoan} />
                             </div>
                         ))}
                     </> : // now = 0 or is less than 0 (bug from backend)
